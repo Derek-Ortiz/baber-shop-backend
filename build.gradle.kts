@@ -56,3 +56,15 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 }
+
+// Configurar el JAR para que sea ejecutable
+tasks.jar {
+    manifest {
+        attributes(
+            "Main-Class" to "com.example.ApplicationKt"
+        )
+    }
+    // Incluir todas las dependencias en el JAR (Fat JAR)
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
