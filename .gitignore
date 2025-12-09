@@ -34,3 +34,23 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Deployment & Secrets ###
+.env
+*.pem
+*.key
+private_key*
+deploy/
+
+### Logs ###
+*.log
+app.log
+logs/
+
+### Database ###
+*.db
+*.sqlite
+
+### OS ###
+.DS_Store
+Thumbs.db

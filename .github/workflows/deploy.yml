@@ -1,0 +1,81 @@
+name: Deploy BarberShop API to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build -x test
+
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        cp -r build/libs/*.jar deploy/
+        cp -r src/main/resources/* deploy/ 2>/dev/null || true
+
+    - name: Deploy to EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        echo "$PRIVATE_KEY" > private_key.pem
+        chmod 600 private_key.pem
+        
+        # Crear directorio en EC2 si no existe
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} '
+          mkdir -p ~/barbershop-api
+        '
+        
+        # Copiar archivos al servidor
+        scp -o StrictHostKeyChecking=no -i private_key.pem -r deploy/* ${USER}@${HOST}:~/barbershop-api/
+        
+        # Copiar script de inicio
+        scp -o StrictHostKeyChecking=no -i private_key.pem scripts/start-service.sh ${USER}@${HOST}:~/barbershop-api/
+        
+        # Ejecutar deployment en el servidor
+        ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} '
+          cd ~/barbershop-api
+          chmod +x start-service.sh
+          ./start-service.sh
+        '
+        
+        # Limpiar
+        rm -f private_key.pem
+
+    - name: Verify deployment
+      env:
+        HOST: ${{ secrets.EC2_HOST }}
+      run: |
+        echo "Esperando 30 segundos para que el servicio inicie..."
+        sleep 30
+        
+        # Verificar que el servicio responda
+        response=$(curl -s -o /dev/null -w "%{http_code}" http://${HOST}:9090/api/health || echo "000")
+        
+        if [ "$response" = "200" ]; then
+          echo "✅ Deployment exitoso! API respondiendo correctamente"
+        else
+          echo "⚠️ Advertencia: El servicio puede estar iniciando. Código de respuesta: $response"
+        fi
+

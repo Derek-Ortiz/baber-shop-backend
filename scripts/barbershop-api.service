@@ -1,0 +1,27 @@
+[Unit]
+Description=BarberShop API Service
+After=network.target mysql.service
+Wants=mysql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/barbershop-api
+ExecStart=/usr/bin/java -jar /home/ubuntu/barbershop-api/backend-BarberShop-1.0.jar
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/home/ubuntu/barbershop-api/app.log
+StandardError=append:/home/ubuntu/barbershop-api/app.log
+
+# Variables de entorno para la base de datos
+Environment="DB_URL=jdbc:mysql://localhost:3306/barbershop_db"
+Environment="DB_USER=BS"
+Environment="DB_PASSWORD=barbershop"
+
+# Límites de recursos
+LimitNOFILE=65536
+MemoryLimit=1G
+
+[Install]
+WantedBy=multi-user.target
+
