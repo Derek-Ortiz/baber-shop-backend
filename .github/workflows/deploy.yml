@@ -39,8 +39,15 @@ jobs:
         HOST: ${{ secrets.EC2_HOST }}
         USER: ${{ secrets.EC2_USER }}
       run: |
-        echo "$PRIVATE_KEY" > private_key.pem
+        # Crear archivo de clave privada con el formato correcto
+        echo "$PRIVATE_KEY" | tr -d '\r' > private_key.pem
         chmod 600 private_key.pem
+        
+        # Verificar que la clave se creó correctamente
+        if [ ! -s private_key.pem ]; then
+          echo "Error: El archivo de clave privada está vacío"
+          exit 1
+        fi
         
         # Crear directorio en EC2 si no existe
         ssh -o StrictHostKeyChecking=no -i private_key.pem ${USER}@${HOST} '
