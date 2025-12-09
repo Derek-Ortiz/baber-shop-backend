@@ -53,11 +53,16 @@ start_service() {
 
     if [ ! -f "$JAR_FILE" ]; then
         echo -e "${RED}❌ Error: No se encontró el archivo JAR${NC}"
+        echo "Archivos disponibles:"
+        ls -lh "$APP_DIR"
         exit 1
     fi
 
+    # Limpiar log anterior
+    > "$LOG_FILE"
+
     # Configurar variables de entorno para la BD
-    export DB_URL="jdbc:mysql://localhost:3306/barber_shop"
+    export DB_URL="jdbc:mysql://localhost:3306/barbershop_db"
     export DB_USER="BS"
     export DB_PASSWORD="barbershop"
 
@@ -70,6 +75,15 @@ start_service() {
 
     echo -e "${GREEN}✅ Servicio iniciado (PID: $(cat $PID_FILE))${NC}"
     echo -e "${GREEN}📝 Logs disponibles en: $LOG_FILE${NC}"
+
+    # Esperar un poco y verificar errores inmediatos
+    sleep 3
+    if ! ps -p $(cat $PID_FILE) > /dev/null 2>&1; then
+        echo -e "${RED}⚠️ El proceso se detuvo. Mostrando últimas líneas del log:${NC}"
+        echo "════════════════════════════════════════"
+        tail -n 30 "$LOG_FILE"
+        echo "════════════════════════════════════════"
+    fi
 }
 
 # Función para verificar el estado

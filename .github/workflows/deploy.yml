@@ -69,12 +69,31 @@ jobs:
           # Esperar un poco para que el proceso inicie
           sleep 10
           
-          # Ejecutar diagnóstico para ver si hay errores
+          # Diagnóstico inline
           echo ""
           echo "════════════════════════════════════════"
-          echo "Ejecutando diagnóstico..."
+          echo "🔍 Diagnóstico del Servicio"
           echo "════════════════════════════════════════"
-          ./diagnose-error.sh
+          
+          # Verificar proceso
+          if ps aux | grep -v grep | grep java > /dev/null; then
+            echo "✅ Proceso Java corriendo"
+            ps aux | grep -v grep | grep java | head -n 1
+          else
+            echo "❌ No hay proceso Java corriendo"
+          fi
+          
+          echo ""
+          echo "📝 Últimas 30 líneas del log:"
+          echo "----------------------------------------"
+          tail -n 30 app.log || echo "No se pudo leer el log"
+          
+          echo ""
+          echo "🌐 Puerto 9090:"
+          netstat -tlnp 2>/dev/null | grep 9090 || echo "Puerto 9090 no está escuchando"
+          
+          echo ""
+          echo "════════════════════════════════════════"
         '
         
         # Limpiar
