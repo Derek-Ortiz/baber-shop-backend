@@ -10,10 +10,10 @@ object DatabaseFactory {
 
     fun init() {
         val config = HikariConfig().apply {
-            driverClassName = "org.mariadb.jdbc.Driver"
-            jdbcUrl = System.getenv("DB_URL") ?: "jdbc:mariadb://localhost:3306/barber_shop"
-            username = System.getenv("DB_USER") ?: "root"
-            password = System.getenv("DB_PASSWORD") ?: ""
+            driverClassName = "com.mysql.cj.jdbc.Driver"
+            jdbcUrl = System.getenv("DB_URL") ?: "jdbc:mysql://localhost:3306/barber_shop"
+            username = System.getenv("DB_USER") ?: "BS"
+            password = System.getenv("DB_PASSWORD") ?: "barbershop"
             maximumPoolSize = 10
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"
