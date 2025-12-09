@@ -62,7 +62,7 @@ start_service() {
     > "$LOG_FILE"
 
     # Configurar variables de entorno para la BD
-    export DB_URL="jdbc:mysql://localhost:3306/barbershop_db"
+    export DB_URL="jdbc:mysql://localhost:3306/barber_shop"
     export DB_USER="BS"
     export DB_PASSWORD="barbershop"
 
